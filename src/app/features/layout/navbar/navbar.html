@@ -1,0 +1,46 @@
+<div class="bg-[#001219]/90 backdrop-blur-xl text-white px-6 py-4 shadow-2xl border-b border-blue-500/20 sticky top-0 z-50">
+    <div class="container mx-auto flex justify-between items-center">
+
+        <h1 class="text-3xl sm:text-4xl font-black tracking-tighter italic">
+            <a routerLink="/" class="flex items-center gap-1 group transition-all">
+                <span class="text-white group-hover:text-blue-400 transition-colors">IA</span>
+                <span class="text-blue-500 animate-pulse">.</span>
+            </a>
+        </h1>
+
+        <button 
+            class="sm:hidden focus:outline-none p-2 hover:bg-blue-900/50 rounded-xl transition-all border border-transparent hover:border-blue-500/30"
+            (click)="isMenuOpen = !isMenuOpen">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-7 h-7 text-blue-400">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
+        </button>
+
+        <ul class="hidden sm:flex items-center gap-10 text-[11px] font-black uppercase tracking-[0.3em]">
+            @for (link of links; track $index) {
+                <li>
+                    <a routerLink="{{link.url}}" 
+                       routerLinkActive="text-blue-400"
+                       class="text-slate-400 hover:text-white transition-all duration-300 relative group py-2">
+                       {{ link.label }}
+                       <span class="absolute bottom-0 left-0 w-0 h-0.5 bg-gradient-to-r from-blue-500 to-cyan-400 transition-all duration-300 group-hover:w-full"></span>
+                    </a>
+                </li>
+            }
+        </ul>
+    </div>
+
+    @if (isMenuOpen) {
+        <ul class="sm:hidden mt-4 space-y-2 text-xs font-bold uppercase tracking-widest bg-[#001219] border border-blue-500/30 px-4 py-6 rounded-2xl shadow-2xl animate-in fade-in slide-in-from-top-4 duration-300">
+            @for (link of links; track $index) {
+                <li>
+                    <a routerLink="{{link.url}}" 
+                       (click)="isMenuOpen = false"
+                       class="block py-4 px-6 hover:bg-blue-600/10 hover:text-blue-400 rounded-xl transition-all border border-transparent hover:border-blue-500/20">
+                       {{ link.label }}
+                    </a>
+                </li>
+            }
+        </ul>
+    }
+</div>
