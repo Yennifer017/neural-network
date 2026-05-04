@@ -1,1 +1,128 @@
-<p>use-ai works!</p>
+<div class="min-h-screen bg-[#001219] text-white p-6 pb-20">
+    <div class="max-w-4xl mx-auto">
+
+        <!-- Header de la Sección -->
+        <header class="mb-10 text-center">
+            <h2 class="text-4xl font-black tracking-tight mb-2 uppercase italic">
+                Visión <span class="text-blue-500">IA</span>
+            </h2>
+            <p class="text-slate-400">Selecciona una fuente de entrada para que la IA procese el dígito.</p>
+        </header>
+
+        <!-- Selector de Modo -->
+        <div class="flex flex-wrap justify-center gap-4 mb-10">
+            @for (mode of ['camera', 'upload', 'draw']; track mode) {
+            <button (click)="activeMode = mode"
+                [class]="activeMode === mode ? 'bg-blue-600 border-blue-400' : 'bg-slate-900/50 border-slate-800 text-slate-500'"
+                class="px-6 py-3 rounded-xl border font-bold uppercase tracking-widest text-xs transition-all duration-300">
+                {{ mode === 'camera' ? 'Cámara' : mode === 'upload' ? 'Subir' : 'Dibujar' }}
+            </button>
+            }
+        </div>
+
+        <!-- Área de Trabajo Principal -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+
+            <!-- Contenedor de Captura -->
+            <div
+                class="bg-slate-900/40 border border-blue-500/10 rounded-3xl overflow-hidden backdrop-blur-sm shadow-2xl">
+
+                <!-- Vista de Cámara -->
+                <div [hidden]="activeMode !== 'camera'" class="relative aspect-square bg-black">
+                    <video #video class="w-full h-full object-cover" autoplay playsinline></video>
+                    <div class="absolute inset-0 border-[40px] border-black/40 pointer-events-none">
+                        <div class="w-full h-full border-2 border-blue-500/30 border-dashed"></div>
+                    </div>
+                </div>
+
+                <!-- Vista de Carga -->
+                <!-- Vista de Carga -->
+                @if (activeMode === 'upload') {
+                <div
+                    class="aspect-square flex flex-col items-center justify-center border-2 border-dashed border-slate-800 m-4 rounded-2xl group hover:border-blue-500/50 transition-colors relative overflow-hidden">
+
+                    <input type="file" (change)="onFileSelected($event)" class="hidden" #fileInput accept="image/*">
+
+                    @if (!previewUrl) {
+                    <!-- Estado vacío: Mostrar icono y botón -->
+                    <div class="flex flex-col items-center">
+                        <svg xmlns="http://www.w3.org/2000/svg"
+                            class="h-12 w-12 text-slate-600 mb-4 group-hover:text-blue-400" fill="none"
+                            viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        </svg>
+                        <button (click)="fileInput.click()"
+                            class="text-sm font-bold text-blue-400 uppercase tracking-tighter">Explorar
+                            archivos</button>
+                    </div>
+                    } @else {
+                    <!-- Estado con imagen: Mostrar previsualización -->
+                    <div class="relative w-full h-full group/preview">
+                        <img [src]="previewUrl" class="w-full h-full object-contain p-4" />
+
+                        <!-- Overlay para cambiar la imagen -->
+                        <div (click)="fileInput.click()"
+                            class="absolute inset-0 bg-black/60 opacity-0 group-hover/preview:opacity-100 transition-opacity flex flex-col items-center justify-center cursor-pointer">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white mb-2" fill="none"
+                                viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                            <span class="text-xs font-bold uppercase">Cambiar imagen</span>
+                        </div>
+                    </div>
+                    }
+                </div>
+                }
+
+                <!-- Vista de Dibujo (Canvas) -->
+                <div [hidden]="activeMode !== 'draw'" class="aspect-square bg-white relative cursor-crosshair">
+                    <canvas #canvas class="w-full h-full touch-none" width="400" height="400"></canvas>
+                    <button (click)="clearCanvas()"
+                        class="absolute bottom-4 right-4 p-2 bg-slate-200 text-slate-800 rounded-lg text-xs hover:bg-slate-300 transition-colors font-bold shadow-md">
+                        Limpiar
+                    </button>
+                </div>
+
+                <!-- Botón de Acción -->
+                <div class="p-6 bg-slate-900/60 border-t border-white/5">
+                    <button (click)="processImage()"
+                        class="w-full py-4 bg-white text-[#001219] font-black uppercase tracking-widest rounded-xl hover:bg-blue-400 transition-all active:scale-95 disabled:opacity-50">
+                        Analizar Imagen
+                    </button>
+                </div>
+            </div>
+
+            <!-- Panel de Resultados -->
+            <div class="space-y-6">
+                <div class="bg-blue-600/5 border border-blue-500/20 p-8 rounded-3xl">
+                    <h3 class="text-xs font-bold text-blue-500 uppercase tracking-[0.2em] mb-6 text-center">Resultado
+                        del Análisis</h3>
+
+                    <div class="flex flex-col items-center justify-center py-10">
+                        @if (prediction !== null) {
+                        <span
+                            class="text-[120px] font-black leading-none text-white drop-shadow-[0_0_30px_rgba(255,255,255,0.2)]">
+                            {{ prediction }}
+                        </span>
+                        } @else {
+                        <div class="w-24 h-24 border-4 border-slate-800 border-t-blue-500 rounded-full animate-spin">
+                        </div>
+                        <p class="mt-8 text-slate-500 animate-pulse uppercase text-xs font-bold tracking-widest">
+                            Esperando entrada...</p>
+                        }
+                    </div>
+                </div>
+
+                <div class="bg-slate-900/20 border border-white/5 p-6 rounded-2xl">
+                    <p class="text-[10px] font-mono text-slate-500 leading-relaxed uppercase tracking-wider">
+                        Logs del sistema: La imagen será redimensionada a 28x28px y procesada por el núcleo de la red
+                        neuronal.
+                    </p>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
