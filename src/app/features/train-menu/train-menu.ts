@@ -3,10 +3,11 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ReportsService } from '../../core/services/reports.service';
 import { AiService } from '../../core/services/ai.service';
+import { RouterModule } from '@angular/router';
 
 @Component({
   selector: 'app-train-menu',
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
   templateUrl: './train-menu.html',
   styleUrl: './train-menu.css',
 })

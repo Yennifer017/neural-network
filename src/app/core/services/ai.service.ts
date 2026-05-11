@@ -31,5 +31,22 @@ export class AiService {
             { params }
         );
     }
-    
+
+    connectAutoTraining(
+        epochs: number,
+        batchSize: number,
+        learningRate: number,
+        eduMode: boolean = false
+    ): WebSocket {
+
+        const wsUrl =
+            `${this.baseUrl.replace('http', 'ws')}` +
+            `/ai/realtime/train/auto` +
+            `?epochs=${epochs}` +
+            `&batch_size=${batchSize}` +
+            `&learning_rate=${learningRate}` +
+            `&edu_mode=${eduMode}`;
+
+        return new WebSocket(wsUrl);
+    }
 }

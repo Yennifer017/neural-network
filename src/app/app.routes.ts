@@ -23,6 +23,16 @@ export const routes: Routes = [
                         path: '',
                         loadComponent: () => 
                             import('./features/train-menu/train-menu').then(c => c.TrainMenu)
+                    },
+                    {
+                        path: 'fast',
+                        loadComponent: () => 
+                            import('./features/train/train').then(c => c.Train)
+                    },
+                    {
+                        path: 'edu',
+                        loadComponent: () => 
+                            import('./features/train-edu/train-edu').then(c => c.TrainEdu)
                     }
                     
                 ]

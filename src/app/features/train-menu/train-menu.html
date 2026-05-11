@@ -1,58 +1,71 @@
 <div class="min-h-screen bg-gray-900 text-white p-8">
-  <div class="max-w-4xl mx-auto">
-    <h1 class="text-3xl font-bold mb-8 border-b border-gray-700 pb-4 text-blue-400">
-      Panel de Control: Red Neuronal
-    </h1>
+    <div class="max-w-4xl mx-auto">
+        <h1 class="text-3xl font-bold mb-8 border-b border-gray-700 pb-4 text-blue-400">
+            Panel de Control: Red Neuronal
+        </h1>
 
-    <!-- Sección de Modos de Entrenamiento -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
-      <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-blue-500 transition-all cursor-pointer group">
-        <h2 class="text-xl font-semibold mb-2 group-hover:text-blue-400">Modo Rápido</h2>
-        <p class="text-gray-400 text-sm mb-4">Optimizado para velocidad. Sin visualizaciones pesadas, directo al resultado.</p>
-        <button class="bg-blue-600 hover:bg-blue-700 px-4 py-2 rounded-lg font-medium transition-colors">
-          Entrenar Ahora
-        </button>
-      </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
 
-      <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-emerald-500 transition-all cursor-pointer group">
-        <h2 class="text-xl font-semibold mb-2 group-hover:text-emerald-400">Modo Educativo</h2>
-        <p class="text-gray-400 text-sm mb-4">Visualiza pesos, sesgos y el flujo de la red paso a paso.</p>
-        <button class="bg-emerald-600 hover:bg-emerald-700 px-4 py-2 rounded-lg font-medium transition-colors">
-          Ver Proceso
-        </button>
-      </div>
-    </div>
+            <!-- Card Modo Rápido -->
+            <div [routerLink]="['/ai/train/fast']"
+                class="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-blue-500 transition-all cursor-pointer group shadow-lg hover:shadow-blue-900/20">
+                <h2 class="text-xl font-semibold mb-2 group-hover:text-blue-400 transition-colors">Modo Rápido</h2>
+                <p class="text-gray-400 text-sm mb-4">Optimizado para velocidad. Sin visualizaciones pesadas, directo al
+                    resultado.</p>
+                <button class="bg-blue-600 group-hover:bg-blue-500 px-4 py-2 rounded-lg font-medium transition-colors">
+                    Entrenar Ahora
+                </button>
+            </div>
 
-    <!-- Sección de Acciones y Configuración -->
-    <div class="bg-gray-800 rounded-2xl p-6 shadow-xl border border-gray-700">
-      <h3 class="text-lg font-semibold mb-6 uppercase tracking-wider text-gray-500">Gestión de Entrenamiento</h3>
-      
-      <div class="space-y-6">
-        <!-- Reiniciar Entrenamiento -->
-        <div class="flex flex-col md:flex-row md:items-center justify-between p-4 bg-gray-900 rounded-lg">
-          <div>
-            <p class="font-medium">Reiniciar Entrenamiento General</p>
-            <label class="inline-flex items-center mt-2 cursor-pointer">
-              <input type="checkbox" class="sr-only peer" [(ngModel)]="useRandomValues">
-              <div class="relative w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-orange-600 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
-              <span class="ms-3 text-sm font-medium text-gray-300">Usar valores aleatorios</span>
-            </label>
-          </div>
-          <button (click)="resetTraining()" class="mt-4 md:mt-0 bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg transition-colors font-bold">
-            Reiniciar
-          </button>
+            <!-- Card Modo Educativo -->
+            <div [routerLink]="['/ai/train/edu']"
+                class="bg-gray-800 p-6 rounded-xl border border-gray-700 hover:border-emerald-500 transition-all cursor-pointer group shadow-lg hover:shadow-emerald-900/20">
+                <h2 class="text-xl font-semibold mb-2 group-hover:text-emerald-400 transition-colors">Modo Educativo
+                </h2>
+                <p class="text-gray-400 text-sm mb-4">Visualiza pesos, sesgos y el flujo de la red paso a paso.</p>
+                <button
+                    class="bg-emerald-600 group-hover:bg-emerald-500 px-4 py-2 rounded-lg font-medium transition-colors">
+                    Ver Proceso
+                </button>
+            </div>
+
         </div>
 
-        <!-- Descargas -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <button (click)="downloadDefaults()" class="flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 p-3 rounded-lg transition-all">
-            <span>⬇️</span> Descargar Valores Default
-          </button>
-          <button (click)="downloadMatrixLog()" class="flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 p-3 rounded-lg transition-all">
-            <span>📊</span> Descargar Log de Matriz
-          </button>
+        <!-- Sección de Acciones y Configuración -->
+        <div class="bg-gray-800 rounded-2xl p-6 shadow-xl border border-gray-700">
+            <h3 class="text-lg font-semibold mb-6 uppercase tracking-wider text-gray-500">Gestión de Entrenamiento</h3>
+
+            <div class="space-y-6">
+                <!-- Reiniciar Entrenamiento -->
+                <div class="flex flex-col md:flex-row md:items-center justify-between p-4 bg-gray-900 rounded-lg">
+                    <div>
+                        <p class="font-medium">Reiniciar Entrenamiento General</p>
+                        <label class="inline-flex items-center mt-2 cursor-pointer">
+                            <input type="checkbox" class="sr-only peer" [(ngModel)]="useRandomValues">
+                            <div
+                                class="relative w-11 h-6 bg-gray-700 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-orange-600 after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all">
+                            </div>
+                            <span class="ms-3 text-sm font-medium text-gray-300">Usar valores aleatorios</span>
+                        </label>
+                    </div>
+                    <button (click)="resetTraining()"
+                        class="mt-4 md:mt-0 bg-red-600 hover:bg-red-700 px-6 py-2 rounded-lg transition-colors font-bold">
+                        Reiniciar
+                    </button>
+                </div>
+
+                <!-- Descargas -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <button (click)="downloadDefaults()"
+                        class="flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 p-3 rounded-lg transition-all">
+                        <span>⬇️</span> Descargar Valores Default
+                    </button>
+                    <button (click)="downloadMatrixLog()"
+                        class="flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 p-3 rounded-lg transition-all">
+                        <span>📊</span> Descargar Log de Matriz
+                    </button>
+                </div>
+            </div>
         </div>
-      </div>
     </div>
-  </div>
 </div>
