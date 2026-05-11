@@ -93,26 +93,36 @@ export class Train {
     animation: false
   };
 
-  submitTraining() {
+  async submitTraining() {
     if (this.isValidConfig) {
       const values = this.trainingForm.getRawValue();
       const isAuto = values.auto_train;
 
       this.epochsDisplay = values.epochs;
+      this.lossHistory = [];
+      let socket;
       if (isAuto) {
-        this.submitAutoTraining(values);
+        socket = this.aiService.connectAutoTraining(
+          values.epochs,
+          values.batch_size,
+          values.learning_rate,
+          false
+        );
       } else {
-        // CASO MANUAL: Mandas parámetros + imágenes + respuestas
-        const payload = {
-          epochs: values.epochs,
-          batch_size: values.batch_size,
-          learning_rate: values.learning_rate,
-          labels: values.labels.split(',').map((l: string) => l.trim()),
-          images: this.selectedFiles, // Array de archivos File
-          mode: 'manual'
-        };
-        console.log('Enviando configuración manual con imágenes:', payload);
+        const labels = values.labels
+          .split(',')
+          .map((l: string) => Number(l.trim()));
+
+        socket = await this.aiService.connectManualTraining(
+          this.selectedFiles,
+          labels,
+          values.epochs,
+          values.batch_size,
+          values.learning_rate,
+          false
+        );
       }
+      this.consumeSocket(values, socket)
     }
   }
 
@@ -120,18 +130,7 @@ export class Train {
   ----------- conexion con los sockets ----------
   ----------------------------------------------*/
 
-  submitAutoTraining(values: any) {
-
-    const socket = this.aiService.connectAutoTraining(
-      values.epochs,
-      values.batch_size,
-      values.learning_rate,
-      false
-    );
-
-    socket.onopen = () => {
-      console.log('WebSocket conectado');
-    };
+  consumeSocket(values: any, socket: WebSocket) {
 
     socket.onmessage = (event) => {
 
