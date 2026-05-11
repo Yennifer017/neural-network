@@ -18,13 +18,12 @@ export const routes: Routes = [
             },
             {
                 path: 'train',
-                component: Layout,
                 children: [
                     {
-                        path: 'select',
+                        path: '',
                         loadComponent: () => 
-                            import('./features/train/train').then(c => c.Train)
-                    },
+                            import('./features/train-menu/train-menu').then(c => c.TrainMenu)
+                    }
                     
                 ]
             },

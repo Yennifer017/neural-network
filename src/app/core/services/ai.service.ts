@@ -20,4 +20,16 @@ export class AiService {
         );
     }
 
+    restartNetwork(randomize: boolean = true): Observable<void> {
+
+        const params = new HttpParams()
+            .set('randomize', randomize);
+
+        return this.http.post<void>(
+            `${this.baseUrl}/ai/restart`,
+            {},
+            { params }
+        );
+    }
+    
 }

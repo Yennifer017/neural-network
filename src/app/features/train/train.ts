@@ -7,5 +7,5 @@ import { Component } from '@angular/core';
   styleUrl: './train.css',
 })
 export class Train {
-
+  
 }
