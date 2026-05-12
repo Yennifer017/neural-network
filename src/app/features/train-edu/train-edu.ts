@@ -24,6 +24,9 @@ export class TrainEdu implements AfterViewInit {
 
   @ViewChild('networkContainer', { static: true })
   containerRef!: ElementRef<HTMLDivElement>;
+
+  public showLegend: boolean = false; // Por defecto cerrada
+
   private stage!: Konva.Stage;
 
   private connectionsLayer = new Konva.Layer();
@@ -489,6 +492,101 @@ export class TrainEdu implements AfterViewInit {
   }
 
 
+  // ...
+
+  private updateNetworkWithRealData(forward: any): void {
+    console.log("Actualizando red con datos reales del backend...");
+
+    // 1. ACTUALIZAR NEURONAS DE ENTRADA (input_values)
+    // Estas son las activaciones 'a' de la capa de entrada (los píxeles)
+    forward.input_values.forEach((value: number, i: number) => {
+      this.updateNeuron(`input_${i}`, value);
+    });
+
+    // 2. ACTUALIZAR CAPA OCULTA (Hidden Layer)
+    // Actualizar Neuronas (Activaciones 'a')
+    forward.hidden_layer.a.forEach((activation: number, i: number) => {
+      this.updateNeuron(`hidden_${i}`, activation);
+    });
+
+    // Actualizar Pesos (Input -> Hidden)
+    // weights suele ser una matriz [num_neuronas_hidden][num_neuronas_input]
+    forward.hidden_layer.weights.forEach((neuronWeights: number[], hiddenIdx: number) => {
+      neuronWeights.forEach((weight: number, inputIdx: number) => {
+        this.updateConnection(`input_${inputIdx}->hidden_${hiddenIdx}`, weight);
+      });
+    });
+
+    // 3. ACTUALIZAR CAPA DE SALIDA (Output Layer)
+    // Actualizar Neuronas (Activaciones 'a')
+    forward.output_layer.a.forEach((activation: number, i: number) => {
+      this.updateNeuron(`output_${i}`, activation);
+    });
+
+    // Actualizar Pesos (Hidden -> Output)
+    forward.output_layer.weights.forEach((neuronWeights: number[], outputIdx: number) => {
+      neuronWeights.forEach((weight: number, hiddenIdx: number) => {
+        this.updateConnection(`hidden_${hiddenIdx}->output_${outputIdx}`, weight);
+      });
+    });
+
+    // 4. Renderizar cambios
+    this.requestRender();
+
+    alert(`Predicción del modelo:"${forward.prediction}`);
+  }
+
+
+  private updateNetworkBackward(backward: any): void {
+    console.log("Visualizando gradientes y actualizaciones de pesos...");
+
+    // 1. CAPA DE SALIDA (Output Layer)
+    // El loss_gradient nos dice cuánto se equivocó cada neurona de salida
+    backward.output_layer.loss_gradient.forEach((grad: number, i: number) => {
+      this.updateNeuronError(`output_${i}`, grad);
+    });
+
+    // Actualizar conexiones Hidden -> Output con los gradientes de pesos
+    backward.output_layer.weight_updates.forEach((neuronGrads: number[], outputIdx: number) => {
+      neuronGrads.forEach((gradValue: number, hiddenIdx: number) => {
+        // Aquí 'gradValue' es cuánto debe cambiar el peso
+        this.updateConnection(`hidden_${hiddenIdx}->output_${outputIdx}`, gradValue);
+      });
+    });
+
+    // 2. CAPA OCULTA (Hidden Layer)
+    // local_gradient o incoming_error representan el error propagado hacia atrás
+    backward.hidden_layer.local_gradient.forEach((grad: number, i: number) => {
+      this.updateNeuronError(`hidden_${i}`, grad);
+    });
+
+    // Actualizar conexiones Input -> Hidden con los gradientes de pesos
+    backward.hidden_layer.weight_updates.forEach((neuronGrads: number[], hiddenIdx: number) => {
+      neuronGrads.forEach((gradValue: number, inputIdx: number) => {
+        this.updateConnection(`input_${inputIdx}->hidden_${hiddenIdx}`, gradValue);
+      });
+    });
+
+    this.requestRender();
+  }
+
+  /**
+   * Método especial para colorear el error en la neurona
+   */
+  private updateNeuronError(label: string, gradient: number): void {
+    const neuron = this.neuronMap.get(label);
+    if (!neuron) return;
+
+    // Usamos una escala de colores distinta para el error (Gradiente)
+    // Por ejemplo: Púrpura para error negativo, Naranja para positivo
+    const absGrad = Math.min(1, Math.abs(gradient) * 5); // Amplificamos para ver el cambio
+    const color = gradient >= 0 ? `rgb(255, 165, ${255 - (absGrad * 255)})` : `rgb(138, 43, 226)`;
+
+    neuron.fill(color);
+    neuron.stroke('#ffffff'); // Borde blanco para resaltar que está en modo backward
+    neuron.strokeWidth(1.5);
+  }
+
 
 
 
@@ -497,29 +595,38 @@ export class TrainEdu implements AfterViewInit {
   ------------------------------------- conexion con los sockets ----------
   ------------------------------------------------------------------------*/
 
-  // 1. El método que dispara el botón
-  public onNextStep(): void {
-    console.log("Simulando actualización de pesos...");
 
+  private trainingSocket?: WebSocket;
+  currentOperation: string = "Nothing";
 
-    // Vamos a actualizar una ráfaga de pesos aleatorios para "probar" la vista
-    // Simulamos actualizar el 10% de las conexiones de entrada -> oculta
-    for (let i = 0; i < 500; i++) {
-      const inputIdx = Math.floor(Math.random() * 784);
-      const hiddenIdx = Math.floor(Math.random() * 64);
-      const randomWeight = (Math.random() * 2) - 1; // Entre -1 y 1
+  onNextStep(): void {
 
-      this.updateConnection(`input_${inputIdx}->hidden_${hiddenIdx}`, randomWeight);
+    if (!this.trainingSocket) {
+
+      alert(
+        'No hay socket activo'
+      );
+
+      return;
     }
 
-    // Actualizamos también algunas activaciones de la capa oculta
-    for (let i = 0; i < 20; i++) {
-      const hiddenIdx = Math.floor(Math.random() * 64);
-      this.updateNeuron(`hidden_${hiddenIdx}`, Math.random());
+    if (
+      this.trainingSocket.readyState !==
+      WebSocket.OPEN
+    ) {
+
+      alert(
+        'Socket no disponible'
+      );
+
+      return;
     }
 
-    // Aplicamos el renderizado
-    this.requestRender();
+    this.trainingSocket.send(
+      JSON.stringify({
+        action: 'next'
+      })
+    );
   }
 
 
@@ -528,42 +635,53 @@ export class TrainEdu implements AfterViewInit {
 
   consumeSocket(values: any, socket: WebSocket) {
 
+    this.trainingSocket = socket;
+
     socket.onmessage = (event) => {
 
       const data = JSON.parse(event.data);
       console.log('Mensaje recibido:', data);
 
-      if (data.status === 'processing') {
-        alert('Empezando entrenamiento...');
+      if (data.status) {
+        alert(data.status);
+      } else
+
+        if (data.general) {
+          this.currentEpoch = data.general.epoch + 1;
+          this.accuracy = data.general.accuracy;
+          this.currentLoss = data.general.loss
+          this.lossHistory.push(data.general.loss);
+
+          //grafico
+          this.lineChartData.labels?.push(
+            `${data.general.epoch}`
+          );
+
+          this.lineChartData.datasets[0].data.push(
+            data.general.loss
+          );
+
+          this.lineChartData = {
+            ...this.lineChartData
+          };
+        }
+
+      if (data.forward) {
+        this.updateNetworkWithRealData(data.forward);
+        this.currentOperation = "Forward"
       }
 
-      if (data.general) {
-        this.currentEpoch = data.general.epoch + 1;
-        this.accuracy = data.general.accuracy;
-        this.currentLoss = data.general.loss
-        this.lossHistory.push(data.general.loss);
-
-        //grafico
-        this.lineChartData.labels?.push(
-          `${data.general.epoch}`
-        );
-
-        this.lineChartData.datasets[0].data.push(
-          data.general.loss
-        );
-
-        this.lineChartData = {
-          ...this.lineChartData
-        };
+      if (data.backward) {
+        this.updateNetworkBackward(data.backward);
+        this.currentOperation = "Backpropagation"
       }
 
       if (data.status === 'finished') {
-        alert('Entrenamiento finalizado');
         this.lineChartData = {
           ...this.lineChartData
         };
+        this.currentOperation = "Nothing";
         socket.close();
-
       }
     };
 
