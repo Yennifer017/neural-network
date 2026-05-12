@@ -608,8 +608,8 @@ export class TrainEdu implements AfterViewInit {
 
     // IMPORTANTE: Definimos qué matriz de pesos mostrar
     // Si estamos en Backpropagation, mostramos los weight_updates del backend
-    const showBackward = ((this.currentOperation === 'Backpropagation' && this.currentBackwardData) 
-      || (this.currentOperation == 'Nothing' && this.currentBackwardData) );
+    const showBackward = ((this.currentOperation === 'Backpropagation' && this.currentBackwardData)
+      || (this.currentOperation == 'Nothing' && this.currentBackwardData));
 
     this.inspectedNode = {
       type: this.currentOperation, // Guardamos el tipo para la vista
@@ -651,6 +651,28 @@ export class TrainEdu implements AfterViewInit {
     } else {
       return isBackprop ? '#e11d48' : '#f43f5e'; // Rojo fuerte (Back) : Rojo (Forw)
     }
+  }
+
+  public showInputs: boolean = false;
+
+  /**
+   * Genera un archivo JSON con los datos actuales y lo descarga
+   */
+  public downloadJSON(): void {
+    const dataToDownload = {
+      operation: this.currentOperation,
+      forward: this.currentForwardData,
+      backward: this.currentBackwardData,
+      timestamp: new Date().toISOString()
+    };
+
+    const blob = new Blob([JSON.stringify(dataToDownload, null, 2)], { type: 'application/json' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `nn-data-${this.currentOperation}-${Date.now()}.json`;
+    a.click();
+    window.URL.revokeObjectURL(url);
   }
 
 
