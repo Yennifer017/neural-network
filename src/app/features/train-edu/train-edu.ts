@@ -588,7 +588,70 @@ export class TrainEdu implements AfterViewInit {
   }
 
 
+  /*-----------------------------------------------------------------------
+  ------------------------------------ informacion de nodos ---------------
+  ------------------------------------------------------------------------*/
 
+  public Math = Math; // Para usar en el HTML
+  public inspectLayer: 'hidden' | 'output' = 'hidden';
+  public inspectIndex: number = 0;
+  public inspectedNode: any = null;
+
+  public onConsultNode(): void {
+    if (!this.currentForwardData) return;
+
+    const layerKey = this.inspectLayer === 'hidden' ? 'hidden_layer' : 'output_layer';
+    const idx = this.inspectIndex;
+
+    const max = this.inspectLayer === 'hidden' ? 64 : 10;
+    if (idx < 0 || idx >= max) return;
+
+    // IMPORTANTE: Definimos qué matriz de pesos mostrar
+    // Si estamos en Backpropagation, mostramos los weight_updates del backend
+    const showBackward = ((this.currentOperation === 'Backpropagation' && this.currentBackwardData) 
+      || (this.currentOperation == 'Nothing' && this.currentBackwardData) );
+
+    this.inspectedNode = {
+      type: this.currentOperation, // Guardamos el tipo para la vista
+      forward: {
+        z: this.currentForwardData[layerKey].z[idx],
+        a: this.currentForwardData[layerKey].a[idx],
+        bias: this.currentForwardData[layerKey].bias[idx],
+        weights: this.currentForwardData[layerKey].weights[idx]
+      },
+      // Si estamos en Backprop, extraemos los datos de error
+      backward: showBackward ? {
+        gradient: this.inspectLayer === 'hidden' ? this.currentBackwardData.hidden_layer.local_gradient[idx] : this.currentBackwardData.output_layer.loss_gradient[idx],
+        incomingError: this.inspectLayer === 'hidden' ? this.currentBackwardData.hidden_layer.incoming_error[idx] : null,
+        weightUpdates: this.currentBackwardData[layerKey].weight_updates[idx] // Esta es la matriz de error
+      } : null
+    };
+  }
+
+  /**
+ * Calcula el ancho de la barra de forma que valores pequeños sean visibles
+ */
+  public getRelativeWidth(val: number): string {
+    if (!val) return '0%';
+    const absVal = Math.abs(val);
+    const factor = this.currentOperation === 'Backpropagation' ? 20 : 5;
+    const width = Math.min(100, (absVal * factor * 100));
+    const finalWidth = width < 2 && absVal > 0 ? 5 : width;
+
+    return `${finalWidth}%`;
+  }
+
+  /**
+   * Define el color según la operación y el signo
+   */
+  public getBarColor(val: number): string {
+    const isBackprop = this.currentOperation === 'Backpropagation';
+    if (val >= 0) {
+      return isBackprop ? '#fb7185' : '#10b981'; // Rosa claro (Back) : Verde (Forw)
+    } else {
+      return isBackprop ? '#e11d48' : '#f43f5e'; // Rojo fuerte (Back) : Rojo (Forw)
+    }
+  }
 
 
   /*----------------------------------------------------------------------
@@ -598,6 +661,8 @@ export class TrainEdu implements AfterViewInit {
 
   private trainingSocket?: WebSocket;
   currentOperation: string = "Nothing";
+  currentForwardData: any = null;
+  currentBackwardData: any = null;
 
   onNextStep(): void {
 
@@ -668,12 +733,14 @@ export class TrainEdu implements AfterViewInit {
 
       if (data.forward) {
         this.updateNetworkWithRealData(data.forward);
-        this.currentOperation = "Forward"
+        this.currentOperation = "Forward";
+        this.currentForwardData = data.forward;
       }
 
       if (data.backward) {
         this.updateNetworkBackward(data.backward);
         this.currentOperation = "Backpropagation"
+        this.currentBackwardData = data.backward;
       }
 
       if (data.status === 'finished') {

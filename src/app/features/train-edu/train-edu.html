@@ -93,126 +93,241 @@
         </form>
     </div>
 
-    
-    <div class="mb-6 mt-8">
-    <!-- Título más sobrio -->
-    <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-200 tracking-tight">
-        <span class="w-1 h-5 bg-blue-500 rounded-full"></span>
-        Red neuronal
-    </h2>
 
-    <!-- Contenedor Compacto -->
-    <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-800 flex items-center justify-between">
-        
-        <div class="flex items-center gap-4">
-            <!-- Indicador de estado pequeño -->
-            <div class="flex items-center gap-2 px-3 py-1 bg-gray-950 rounded-md border border-gray-800">
-                <span class="relative flex h-2 w-2">
-                    <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
-                          [ngClass]="currentOperation === 'FORWARD' ? 'bg-emerald-400' : 'bg-rose-400'"></span>
-                    <span class="relative inline-flex rounded-full h-2 w-2"
-                          [ngClass]="currentOperation === 'FORWARD' ? 'bg-emerald-500' : 'bg-rose-500'"></span>
-                </span>
-                <span class="text-[10px] font-mono text-gray-500 tracking-widest uppercase">Status</span>
+    <div class="mb-6 mt-8">
+        <!-- Título más sobrio -->
+        <h2 class="text-lg font-semibold mb-4 flex items-center gap-2 text-gray-200 tracking-tight">
+            <span class="w-1 h-5 bg-blue-500 rounded-full"></span>
+            Red neuronal
+        </h2>
+
+        <!-- Contenedor Compacto -->
+        <div class="bg-gray-900/50 p-4 rounded-lg border border-gray-800 flex items-center justify-between">
+
+            <div class="flex items-center gap-4">
+                <!-- Indicador de estado pequeño -->
+                <div class="flex items-center gap-2 px-3 py-1 bg-gray-950 rounded-md border border-gray-800">
+                    <span class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full opacity-75"
+                            [ngClass]="currentOperation === 'FORWARD' ? 'bg-emerald-400' : 'bg-rose-400'"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2"
+                            [ngClass]="currentOperation === 'FORWARD' ? 'bg-emerald-500' : 'bg-rose-500'"></span>
+                    </span>
+                    <span class="text-[10px] font-mono text-gray-500 tracking-widest uppercase">Status</span>
+                </div>
+
+                <!-- Operación Actual -->
+                <div>
+                    <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-0.5">Procesando</p>
+                    <div class="text-xl font-mono font-bold transition-colors duration-300"
+                        [ngClass]="currentOperation === 'FORWARD' ? 'text-emerald-400' : 'text-rose-400'">
+                        {{ currentOperation }}
+                    </div>
+                </div>
             </div>
 
-            <!-- Operación Actual -->
-            <div>
-                <p class="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-0.5">Procesando</p>
-                <div class="text-xl font-mono font-bold transition-colors duration-300"
-                     [ngClass]="currentOperation === 'FORWARD' ? 'text-emerald-400' : 'text-rose-400'">
-                    {{ currentOperation }}
+            <!-- Metadata de la Red -->
+            <div class="flex gap-6 border-l border-gray-800 pl-6">
+                <div class="text-right">
+                    <p class="text-[10px] text-gray-600 uppercase font-bold">Input</p>
+                    <p class="text-xs font-mono text-gray-400">28×28 px</p>
+                </div>
+                <div class="text-right">
+                    <p class="text-[10px] text-gray-600 uppercase font-bold">Layers</p>
+                    <p class="text-xs font-mono text-gray-400">3 Total</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-4 border border-gray-800 rounded-lg overflow-hidden transition-all duration-300">
+        <!-- Botón Colapsable -->
+        <button (click)="showLegend = !showLegend"
+            class="w-full flex items-center justify-between p-3 bg-gray-900/30 hover:bg-gray-800/50 transition-colors text-left">
+            <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24"
+                    stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d=" activism 13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Guía de Interpretación</span>
+            </div>
+            <svg [style.transform]="showLegend ? 'rotate(180deg)' : 'rotate(0deg)'"
+                class="h-4 w-4 text-gray-500 transition-transform duration-300" fill="none" viewBox="0 0 24 24"
+                stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+            </svg>
+        </button>
+
+        <!-- Contenido de la Leyenda -->
+        <div [class.max-h-0]="!showLegend" [class.max-h-96]="showLegend"
+            class="overflow-hidden transition-all duration-500 ease-in-out bg-gray-950/50">
+            <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-800">
+
+                <!-- Columna Forward -->
+                <div class="space-y-3">
+                    <h4
+                        class="text-[10px] font-black text-emerald-500 uppercase tracking-tighter flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Proceso: Forward
+                    </h4>
+                    <div class="space-y-2 text-[11px]">
+                        <div class="flex items-center gap-3 text-gray-300">
+                            <div class="w-3 h-3 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.5)]"></div>
+                            <span><b>Brillo:</b> Nivel de activación (0 a 1).</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-gray-300">
+                            <div class="w-3 h-[2px] bg-emerald-500"></div>
+                            <span><b>Verde:</b> Peso positivo (Excitatorio).</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-gray-300">
+                            <div class="w-3 h-[2px] bg-rose-500"></div>
+                            <span><b>Rojo:</b> Peso negativo (Inhibitorio).</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Columna Backward -->
+                <div class="space-y-3">
+                    <h4 class="text-[10px] font-black text-rose-500 uppercase tracking-tighter flex items-center gap-2">
+                        <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Proceso: Backpropagation
+                    </h4>
+                    <div class="space-y-2 text-[11px]">
+                        <div class="flex items-center gap-3 text-gray-300">
+                            <div class="w-3 h-3 rounded-full border border-white" style="background: rgb(255, 165, 0)">
+                            </div>
+                            <span><b>Naranja/Púrpura:</b> Gradiente (Error detectado).</span>
+                        </div>
+                        <div class="flex items-center gap-3 text-gray-300">
+                            <div class="w-3 h-1 bg-white opacity-50"></div>
+                            <span><b>Grosor:</b> Magnitud del ajuste del peso.</span>
+                        </div>
+                        <p class="text-[9px] text-gray-500 italic mt-2 leading-tight">
+                            * El error fluye de salida a entrada para ajustar las conexiones.
+                        </p>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+
+    <!--Inspector tecnico-->
+    <div class="mt-6 bg-gray-900 border border-gray-700 rounded-xl overflow-hidden shadow-2xl">
+        <!-- Header con Inputs -->
+        <div class="p-4 bg-gray-800/50 border-b border-gray-700">
+            <div class="grid grid-cols-3 gap-3">
+                <div class="flex flex-col">
+                    <label class="text-[9px] text-gray-500 uppercase font-bold mb-1">Capa</label>
+                    <select [(ngModel)]="inspectLayer"
+                        class="bg-gray-950 text-xs border border-gray-700 rounded p-2 text-white outline-none focus:border-blue-500">
+                        <option value="hidden">Hidden Layer</option>
+                        <option value="output">Output Layer</option>
+                    </select>
+                </div>
+                <div class="flex flex-col">
+                    <label class="text-[9px] text-gray-500 uppercase font-bold mb-1">Índice</label>
+                    <input type="number" [(ngModel)]="inspectIndex"
+                        class="bg-gray-950 text-xs border border-gray-700 rounded p-2 text-white outline-none focus:border-blue-500">
+                </div>
+                <button (click)="onConsultNode()"
+                    class="self-end bg-blue-600 hover:bg-blue-500 h-[34px] rounded font-bold text-[10px] uppercase tracking-wider transition-all active:scale-95 text-white">
+                    Inspeccionar
+                </button>
+            </div>
+        </div>
+
+        <!-- Resultados -->
+        <div class="mt-6 bg-gray-900 border border-gray-700 rounded-xl overflow-hidden shadow-2xl"
+            *ngIf="inspectedNode">
+
+            <!-- Header de Datos Rápidos -->
+            <div class="p-5 grid grid-cols-3 gap-4 border-b border-gray-800 bg-black/20">
+                <div class="text-center">
+                    <p class="text-[9px] text-gray-500 uppercase font-black">Suma (Z)</p>
+                    <p class="text-sm font-mono font-bold text-emerald-400">{{ inspectedNode.forward.z }}</p>
+                </div>
+                <div class="text-center border-x border-gray-800">
+                    <p class="text-[9px] text-gray-500 uppercase font-black">Activación (A)</p>
+                    <p class="text-sm font-mono font-bold text-emerald-400">{{ inspectedNode.forward.a }}</p>
+                </div>
+                <div class="text-center">
+                    <p class="text-[9px] text-blue-400 uppercase font-black tracking-tighter">Bias Individual</p>
+                    <p class="text-sm font-mono font-bold text-blue-300">{{ inspectedNode.forward.bias }}</p>
+                </div>
+            </div>
+
+            <div class="p-5 font-mono">
+                <!-- INFO DE BACKPROPAGATION (Solo si la operación es esa) -->
+                <div *ngIf="inspectedNode.backward" class="mb-6 animate-in slide-in-from-top-2 duration-300">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="flex h-2 w-2 rounded-full bg-rose-500 shadow-[0_0_8px_#f43f5e]"></span>
+                        <p class="text-[10px] text-rose-500 font-black uppercase tracking-widest">Análisis de Gradientes
+                        </p>
+                    </div>
+                    <div class="grid grid-cols-2 gap-4 bg-rose-950/20 p-3 rounded-lg border border-rose-900/30 text-xs">
+                        <div>
+                            <p class="text-gray-500 text-[9px]">GRADIENTE LOCAL</p>
+                            <p class="text-rose-400 font-bold italic">{{ inspectedNode.backward.gradient }}</p>
+                        </div>
+                        <div class="text-right" *ngIf="inspectedNode.backward.incomingError">
+                            <p class="text-gray-500 text-[9px]">ERROR PROPAGADO</p>
+                            <p class="text-rose-400 font-bold italic">{{ inspectedNode.backward.incomingError }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MATRIZ DE PESOS / ACTUALIZACIONES -->
+                <div class="mb-3 flex justify-between items-end">
+                    <div>
+                        <p class="text-[10px] font-black uppercase tracking-widest transition-colors duration-500"
+                            [ngClass]="inspectedNode.backward ? 'text-rose-500' : 'text-emerald-500'">
+                            {{ inspectedNode.backward ? 'Matriz de Actualización (Δ Weights)' : 'Matriz de Pesos(Weights)' }}
+                        </p>
+                        <p class="text-[8px] text-gray-600 italic">
+                            Visualizando {{ inspectedNode.backward ? 'el error acorregir' : 'la fuerza de conexión' }}
+                        </p>
+                    </div>
+                    <span class="text-[10px] text-gray-500 bg-gray-800 px-2 py-0.5 rounded">
+                        N = {{ inspectedNode.forward.weights.length }}</span>
+                </div>
+
+                <!-- GRID DINÁMICO -->
+                <div
+                    class="grid grid-cols-5 sm:grid-cols-8 gap-2 max-h-72 overflow-y-auto custom-scrollbar p-3 bg-black/40 rounded-xl border border-gray-800">
+                    <!-- Decidimos qué arreglo recorrer: backward.weightUpdates o forward.weights -->
+                    <div *ngFor="let val of (inspectedNode.backward ? inspectedNode.backward.weightUpdates : inspectedNode.forward.weights); let i = index"
+                        class="flex flex-col items-center bg-gray-900/50 p-2 rounded border border-gray-800/30 hover:border-gray-600 transition-all">
+
+                        <span class="text-[7px] text-gray-600 mb-1">#{{i}}</span>
+
+                        <!-- Valor Numérico Grande -->
+                        <span class="text-[11px] font-black tracking-tighter" [class.text-emerald-400]="val >= 0"
+                            [class.text-rose-400]="val < 0">
+                            {{ val }}
+                        </span>
+
+                        <!-- Gráfico de barra de magnitud mejorado -->
+<div class="w-full h-1.5 mt-2 rounded-full bg-gray-800 overflow-hidden border border-black/20">
+    <div class="h-full transition-all duration-700 ease-out"
+        [style.width]="getRelativeWidth(val)"
+        [style.background-color]="getBarColor(val)">
+    </div>
+</div>
+                    </div>
                 </div>
             </div>
         </div>
 
-        <!-- Metadata de la Red -->
-        <div class="flex gap-6 border-l border-gray-800 pl-6">
-            <div class="text-right">
-                <p class="text-[10px] text-gray-600 uppercase font-bold">Input</p>
-                <p class="text-xs font-mono text-gray-400">28×28 px</p>
+        <ng-template #noData>
+            <div class="py-16 text-center text-gray-600 italic flex flex-col items-center">
+                <div
+                    class="w-12 h-12 border-2 border-gray-800 rounded-full mb-4 flex items-center justify-center opacity-30">
+                    <span class="text-2xl">?</span>
+                </div>
+                <p class="text-xs uppercase tracking-widest font-bold">Selecciona una neurona para auditar datos</p>
             </div>
-            <div class="text-right">
-                <p class="text-[10px] text-gray-600 uppercase font-bold">Layers</p>
-                <p class="text-xs font-mono text-gray-400">3 Total</p>
-            </div>
-        </div>
+        </ng-template>
     </div>
-</div>
-
-<div class="mt-4 border border-gray-800 rounded-lg overflow-hidden transition-all duration-300">
-  <!-- Botón Colapsable -->
-  <button 
-    (click)="showLegend = !showLegend"
-    class="w-full flex items-center justify-between p-3 bg-gray-900/30 hover:bg-gray-800/50 transition-colors text-left"
-  >
-    <div class="flex items-center gap-2">
-      <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d=" activism 13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-      </svg>
-      <span class="text-xs font-bold uppercase tracking-widest text-gray-400">Guía de Interpretación</span>
-    </div>
-    <svg 
-      [style.transform]="showLegend ? 'rotate(180deg)' : 'rotate(0deg)'"
-      class="h-4 w-4 text-gray-500 transition-transform duration-300" 
-      fill="none" viewBox="0 0 24 24" stroke="currentColor"
-    >
-      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
-    </svg>
-  </button>
-
-  <!-- Contenido de la Leyenda -->
-  <div 
-    [class.max-h-0]="!showLegend" 
-    [class.max-h-96]="showLegend"
-    class="overflow-hidden transition-all duration-500 ease-in-out bg-gray-950/50"
-  >
-    <div class="p-4 grid grid-cols-1 md:grid-cols-2 gap-6 border-t border-gray-800">
-      
-      <!-- Columna Forward -->
-      <div class="space-y-3">
-        <h4 class="text-[10px] font-black text-emerald-500 uppercase tracking-tighter flex items-center gap-2">
-          <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span> Proceso: Forward
-        </h4>
-        <div class="space-y-2 text-[11px]">
-          <div class="flex items-center gap-3 text-gray-300">
-            <div class="w-3 h-3 rounded-full bg-white shadow-[0_0_8px_rgba(255,255,255,0.5)]"></div>
-            <span><b>Brillo:</b> Nivel de activación (0 a 1).</span>
-          </div>
-          <div class="flex items-center gap-3 text-gray-300">
-            <div class="w-3 h-[2px] bg-emerald-500"></div>
-            <span><b>Verde:</b> Peso positivo (Excitatorio).</span>
-          </div>
-          <div class="flex items-center gap-3 text-gray-300">
-            <div class="w-3 h-[2px] bg-rose-500"></div>
-            <span><b>Rojo:</b> Peso negativo (Inhibitorio).</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Columna Backward -->
-      <div class="space-y-3">
-        <h4 class="text-[10px] font-black text-rose-500 uppercase tracking-tighter flex items-center gap-2">
-          <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span> Proceso: Backpropagation
-        </h4>
-        <div class="space-y-2 text-[11px]">
-          <div class="flex items-center gap-3 text-gray-300">
-            <div class="w-3 h-3 rounded-full border border-white" style="background: rgb(255, 165, 0)"></div>
-            <span><b>Naranja/Púrpura:</b> Gradiente (Error detectado).</span>
-          </div>
-          <div class="flex items-center gap-3 text-gray-300">
-            <div class="w-3 h-1 bg-white opacity-50"></div>
-            <span><b>Grosor:</b> Magnitud del ajuste del peso.</span>
-          </div>
-          <p class="text-[9px] text-gray-500 italic mt-2 leading-tight">
-            * El error fluye de salida a entrada para ajustar las conexiones.
-          </p>
-        </div>
-      </div>
-
-    </div>
-  </div>
-</div>
 
     <div class="
     w-full
