@@ -1,1 +1,181 @@
-<p>train-edu works!</p>
+<!-- Fondo general con un tono Slate más suave para que no sea negro puro -->
+<div class="min-h-screen bg-slate-900 p-6 text-slate-300 font-sans">
+
+    <!-- Contenedor principal con un tono ligeramente más claro y bordes definidos -->
+    <div class="max-w-2xl mx-auto bg-slate-800/50 border border-slate-700 backdrop-blur-sm rounded-3xl p-10 shadow-xl">
+
+        <!-- Encabezado con acento azul/cian -->
+        <div class="flex items-center gap-5 mb-10">
+            <div
+                class="w-14 h-14 bg-blue-500/10 rounded-2xl flex items-center justify-center border border-blue-500/20 shadow-inner">
+                <span class="text-2xl">⚙️</span>
+            </div>
+            <div>
+                <h2 class="text-2xl font-extrabold text-white tracking-tight">Modo Rápido</h2>
+                <p class="text-sm text-slate-400 font-medium">Configura los parámetros de tu red neuronal</p>
+            </div>
+        </div>
+
+        <form [formGroup]="trainingForm" (ngSubmit)="submitTraining()" class="space-y-8">
+
+            <!-- Grid de Parámetros con inputs estilo "glass" -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="flex flex-col gap-2">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Epochs</label>
+                    <input type="number" formControlName="epochs"
+                        class="bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Batch Size</label>
+                    <input type="number" formControlName="batch_size"
+                        class="bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                </div>
+
+                <div class="flex flex-col gap-2">
+                    <label class="text-xs font-bold text-slate-400 uppercase tracking-wider ml-1">Learning Rate</label>
+                    <input type="number" step="0.001" formControlName="learning_rate"
+                        class="bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition-all">
+                </div>
+            </div>
+
+            <!-- Tarjeta de Switch más integrada -->
+            <div
+                class="flex items-center justify-between p-6 bg-slate-900/40 border border-slate-700 rounded-2xl transition-colors hover:bg-slate-900/60">
+                <div class="pr-4">
+                    <h4 class="text-sm font-bold text-white">Auto-entrenamiento</h4>
+                    <p class="text-xs text-slate-500 mt-1">Usa los datos predefinidos para un inicio inmediato.</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" formControlName="auto_train" class="sr-only peer">
+                    <div
+                        class="w-12 h-6 bg-slate-700 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-slate-400 after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-blue-600">
+                    </div>
+                </label>
+            </div>
+
+            <!-- Sección Manual con contraste sutil -->
+            <div *ngIf="!trainingForm.get('auto_train')?.value"
+                class="p-6 bg-slate-900/20 border border-slate-700/50 rounded-2xl space-y-6 animate-in fade-in zoom-in-95 duration-300">
+
+                <div class="flex items-center gap-2 mb-2">
+                    <div class="h-2 w-2 bg-blue-500 rounded-full animate-pulse"></div>
+                    <h3 class="text-xs font-bold text-blue-400 uppercase tracking-widest">Carga de Datos Manual</h3>
+                </div>
+
+                <div class="space-y-3">
+                    <label class="text-sm font-medium text-slate-300">Imágenes</label>
+                    <input type="file" (change)="onFileChange($event)" multiple accept="image/*"
+                        class="block w-full text-xs text-slate-400 file:mr-4 file:py-2.5 file:px-5 file:rounded-xl file:border-0 file:text-xs file:font-bold file:bg-blue-600/20 file:text-blue-400 hover:file:bg-blue-600/30 cursor-pointer transition-all">
+                </div>
+
+                <div class="space-y-3">
+                    <label class="text-sm font-medium text-slate-300">Etiquetas (IDs)</label>
+                    <input type="text" formControlName="labels" placeholder="ej: 0, 1, 1, 0"
+                        class="w-full bg-slate-900/80 border border-slate-700 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 outline-none transition-all placeholder:text-slate-700">
+
+                    <div class="flex justify-between items-center px-1">
+                        <span class="text-[10px] text-slate-500 italic">Estructura: n, n, n...</span>
+                        <span class="text-xs font-mono"
+                            [ngClass]="labelCount === selectedFiles.length ? 'text-emerald-400' : 'text-orange-400'">
+                            {{labelCount}} de {{selectedFiles.length}} etiquetas
+                        </span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Botón con Gradiente para resaltar -->
+            <button type="submit" [disabled]="!isValidConfig"
+                class="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 disabled:from-slate-800 disabled:to-slate-800 disabled:text-slate-600 text-white font-bold rounded-2xl transition-all shadow-lg shadow-blue-900/20 active:scale-[0.97] uppercase tracking-widest text-xs">
+                Iniciar Entrenamiento
+            </button>
+
+        </form>
+    </div>
+
+    <h2>Red neuronal renderizada</h2>
+    <div class="
+    w-full
+    h-[700px]
+    rounded-2xl
+    overflow-hidden
+    border
+    border-slate-800
+    bg-slate-950
+  ">
+
+        <div #networkContainer class="
+      w-full
+      h-full
+      bg-[radial-gradient(circle_at_center,_#1e293b_0%,_#020617_100%)]
+    "></div>
+
+    </div>
+    <button 
+    (click)="onNextStep()"
+    class="px-6 py-2 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg 
+           transition-all duration-300 transform active:scale-95 shadow-lg shadow-blue-900/20 
+           uppercase tracking-wider text-sm border border-blue-400/30">
+    Next Step
+</button>
+
+
+    <div class="p-6 bg-gray-900 text-white min-h-screen">
+        <h2 class="text-2xl font-bold mb-6 border-b border-gray-700 pb-2">
+            Monitor de Entrenamiento
+        </h2>
+
+        <!-- Sección de Métricas Principales -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+
+            <!-- Epochs Card -->
+            <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-lg">
+                <p class="text-gray-400 text-sm uppercase font-semibold">Progreso</p>
+                <div class="flex items-baseline gap-2">
+                    <span class="text-3xl font-mono text-blue-400">{{ currentEpoch }}</span>
+                    <span class="text-gray-500">/</span>
+                    <span class="text-xl text-gray-300">{{ epochsDisplay }}</span>
+                </div>
+                <p class="text-xs text-gray-500 mt-2 italic">Epochs completados</p>
+            </div>
+
+            <!-- Accuracy Card -->
+            <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-lg">
+                <p class="text-gray-400 text-sm uppercase font-semibold">Precisión (Accuracy)</p>
+                <div class="text-3xl font-mono text-green-400">
+                    {{ accuracy | percent:'1.2-2' }}
+                </div>
+                <div class="w-full bg-gray-700 h-2 rounded-full mt-3">
+                    <div class="bg-green-500 h-2 rounded-full transition-all duration-500"
+                        [style.width.%]="accuracy * 100"></div>
+                </div>
+            </div>
+
+            <!-- Current Loss Card -->
+            <div class="bg-gray-800 p-4 rounded-xl border border-gray-700 shadow-lg">
+                <p class="text-gray-400 text-sm uppercase font-semibold">Pérdida Actual (Loss)</p>
+                <div class="text-3xl font-mono text-red-400">
+                    {{ currentLoss | number:'1.4-4' }}
+                </div>
+                <p class="text-xs text-gray-500 mt-2 italic">Valor del último batch</p>
+            </div>
+
+        </div>
+
+        <!-- Sección de la Gráfica -->
+        <div class="bg-gray-800 p-6 rounded-xl border border-gray-700 shadow-lg">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-lg font-medium text-gray-200">Historial de Pérdida</h3>
+                <span class="px-2 py-1 bg-gray-700 rounded text-xs text-gray-400">Real-time</span>
+            </div>
+
+            <!-- Contenedor crítico: relativo y con altura definida -->
+            <div class="relative w-full h-[400px]">
+                <canvas baseChart [data]="lineChartData" [options]="lineChartOptions" [type]="'line'">
+                </canvas>
+            </div>
+        </div>
+
+    </div>
+
+</div>
